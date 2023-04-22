@@ -11,8 +11,19 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
+    contextBridge.exposeInMainWorld('app', {
+      quit: () => ipcRenderer.send('app:quit'),
+      maximize: () => ipcRenderer.send('mainWindow:maximize'),
+      minimize: () => ipcRenderer.send('mainWindow:minimize')
+    })
     contextBridge.exposeInMainWorld('electronAPI', {
-      apiAxios: (url, params, method) => ipcRenderer.invoke('api:apiAxios', url, params, method)
+      apiAxios: (url, query, body, method, headers = {}) =>
+        ipcRenderer.invoke('api:apiAxios', url, query, body, method, headers),
+      readFile: (path) => ipcRenderer.invoke('file:readFile', path),
+      saveFile: (path, context) => ipcRenderer.invoke('file:saveFile', path, context)
+    })
+    ipcRenderer.on('mainWindow:changeimize', (_, state: 'max' | 'min') => {
+      console.log(state)
     })
   } catch (error) {
     console.error(error)

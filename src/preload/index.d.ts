@@ -1,16 +1,24 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
-import { AxiosResponse } from 'axios'
 
 declare global {
   interface Window {
     electron: ElectronAPI
     api: unknown
+    app: {
+      quit: () => void
+      maximize: () => void
+      minimize: () => void
+    }
     electronAPI: {
       apiAxios: (
         url: string,
-        params: unknown,
-        method: 'get' | 'post'
-      ) => Promise<AxiosResponse<unknown, unknown>>
+        query: unknown,
+        body: unknown,
+        method: 'get' | 'post',
+        headers?
+      ) => Promise<unknown>
+      readFile: (path: string) => string
+      saveFile: (path: string, context: string) => void
     }
   }
 }

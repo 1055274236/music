@@ -1,23 +1,30 @@
 import BaseOperation from './BaseOperation'
+import { Listener } from './type'
+type listenerMode = 'beforeSetVolume' | 'afterSetVolume'
 
 class VolumeOperation extends BaseOperation {
-  signVolume = -1
-  beforeSetVolume: () => unknown
-  afterSetVolume: () => unknown
+  signVolume = 0
+  gainNode: GainNode
 
-  constructor(playerDom: HTMLMediaElement, gainNode: GainNode) {
-    super(playerDom, gainNode)
-    this.beforeSetVolume = (): void => {}
-    this.afterSetVolume = (): void => {}
+  private beforeSetVolumeArr: Listener[] = []
+  private afterSetVolumeArr: Listener[] = []
+
+  private beforeSetVolume = (): void => this.listenerRun(this.beforeSetVolumeArr)
+  private afterSetVolume = (): void => this.listenerRun(this.afterSetVolumeArr)
+
+  constructor(gainNode: GainNode) {
+    super()
     this.gainNode = gainNode
-    this.playerDom = playerDom
   }
 
-  onBeforeSetVolume(func: () => unknown): void {
-    this.beforeSetVolume = func
+  addListener(event: listenerMode, fun: () => unknown): string {
+    const id = new Date().getTime().toString()
+    const item = { id, fun }
+    eval(`this.${event}Arr`).push(item)
+    return id
   }
-  onAfterSetVolume(func: () => unknown): void {
-    this.afterSetVolume = func
+  removeListener(event: listenerMode, index: string | (() => unknown)): void {
+    this.listenerDelete(eval(`this.${event}Arr`), index)
   }
 
   setVolume(volume: number): number {
@@ -31,17 +38,13 @@ class VolumeOperation extends BaseOperation {
     return this.gainNode.gain.value
   }
 
-  lowerVolume(volume: number): number {
-    const v = this.getVolume() - volume
-    return this.setVolume(v)
-  }
-
   mute(): void {
-    this.signVolume = this.getVolume()
-    this.gainNode.gain.exponentialRampToValueAtTime(0, this.playerDom.currentTime + 1)
-  }
-  cancelMute(): void {
-    this.gainNode.gain.exponentialRampToValueAtTime(this.signVolume, this.playerDom.currentTime + 1)
+    if (this.getVolume() === 0) {
+      this.setVolume(this.signVolume)
+    } else {
+      this.signVolume = this.getVolume()
+      this.setVolume(0)
+    }
   }
 }
 

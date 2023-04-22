@@ -3,23 +3,38 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import apiAxios from './axios'
-
-process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
+import { readFile, saveFile } from './file'
 
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
+    width: 1000,
     height: 670,
     minHeight: 670,
-    minWidth: 900,
+    minWidth: 1000,
     show: false,
     autoHideMenuBar: true,
+    frame: false,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
+  })
+
+  ipcMain.on('app:quit', () => app.quit())
+  ipcMain.on('mainWindow:maximize', () =>
+    mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize()
+  )
+  ipcMain.on('mainWindow:minimize', () => {
+    mainWindow.isMinimized() ? mainWindow.restore() : mainWindow.minimize()
+  })
+
+  mainWindow.on('maximize', () => {
+    mainWindow.webContents.send('mainWindow:changeimize', 'max')
+  })
+  mainWindow.on('unmaximize', () => {
+    mainWindow.webContents.send('mainWindow:changeimize', 'unMax')
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -54,6 +69,8 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
   ipcMain.handle('api:apiAxios', apiAxios)
+  ipcMain.handle('file:readFile', readFile)
+  ipcMain.handle('file:saveFile', saveFile)
 
   createWindow()
 

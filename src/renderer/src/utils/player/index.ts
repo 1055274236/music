@@ -3,31 +3,25 @@ import VolumeOperation from './VolumeOperation'
 
 class Player {
   ac: AudioContext = new AudioContext()
-  sourceDom!: HTMLMediaElement
   sourceNode: MediaElementAudioSourceNode
   gainNode: GainNode = this.ac.createGain()
   destinationNode: AudioDestinationNode = this.ac.destination
-  config = {
-    autoplay: false
-  }
+  volume: VolumeOperation
+  play: PlayOperation
 
-  constructor(carrier: string | HTMLAudioElement) {
-    if (typeof carrier === 'string') {
-      const dom = document.querySelector(carrier)
-      if (dom instanceof HTMLMediaElement) {
-        this.sourceDom = dom
-      }
-    } else {
-      this.sourceDom = carrier
-    }
-    this.sourceNode = this.ac.createMediaElementSource(this.sourceDom)
+  constructor() {
+    const sourceDom = document.createElement('audio')
+    sourceDom.crossOrigin = 'anonymous'
+    sourceDom.autoplay = false
+    sourceDom.volume = 1
+    this.sourceNode = this.ac.createMediaElementSource(sourceDom)
 
     this.sourceNode.connect(this.gainNode)
     this.gainNode.connect(this.destinationNode)
-  }
 
-  volume = new VolumeOperation(this.sourceDom, this.gainNode)
-  play = new PlayOperation(this.sourceDom, this.gainNode)
+    this.volume = new VolumeOperation(this.gainNode)
+    this.play = new PlayOperation(this.sourceNode)
+  }
 }
 
 export default Player
