@@ -7,6 +7,7 @@ import {
 } from '@renderer/api/type'
 import { reactive, onMounted, ref, onBeforeUnmount } from 'vue'
 import { useMouseInElement } from '@vueuse/core'
+import { Play } from '@renderer/components/icon'
 
 interface DataType {
   songListType: SongListCategoriesDataType
@@ -29,8 +30,8 @@ const data: DataType = reactive({
   songList: [],
 
   page: 1,
-  total: 20,
-  num: 20
+  total: 40,
+  num: 40
 })
 const bigBox = ref<HTMLDivElement>()
 
@@ -53,8 +54,8 @@ const getList = async (): Promise<void> => {
   const result = await SongListApi.getSongLists({
     sortId: data.sortId,
     categoryId: data.categoryId,
-    limit: 19,
-    offect: (data.page - 1) * 20
+    limit: data.num - 1,
+    offect: (data.page - 1) * data.num
   })
 
   data.songList = result.data.list
@@ -103,6 +104,14 @@ const getHeight = (): number => {
   height > 28 && (height -= 28)
   return height
 }
+
+const optimizeLikeNum = (likenum: number): string => {
+  return likenum > 100000
+    ? likenum > 100000000
+      ? `${Math.ceil(likenum / 100000000)}亿`
+      : `${Math.ceil(likenum / 10000)}万`
+    : `${likenum}`
+}
 </script>
 
 <template>
@@ -148,6 +157,12 @@ const getHeight = (): number => {
         <div class="songlist-item-box">
           <div class="item-img-box">
             <img :src="item.imgurl" :alt="item.dissname" />
+            <div class="img-shade">
+              <div class="img-shade-bottom">
+                <div class="listennum">{{ optimizeLikeNum(item.listennum) }}</div>
+                <div class="icon-play"><Play /></div>
+              </div>
+            </div>
           </div>
           <div class="item-details-box"></div>
           <div class="item-details-label">{{ item.dissname }}</div>
@@ -231,17 +246,17 @@ const getHeight = (): number => {
     flex-wrap: wrap;
     .songlist-item {
       flex: 1;
-      height: 160px;
+      height: 140px;
       position: relative;
-      max-width: 200px;
-      min-width: 160px;
+      max-width: 140px;
+      min-width: 120px;
       position: relative;
       margin: 10px 10px;
 
       .songlist-item-box {
         position: absolute;
         width: 100%;
-        height: 160px;
+        height: 140px;
         border-radius: 10px;
         // background-color: #c4c4c4;
         transition: all 0.5s ease;
@@ -251,15 +266,20 @@ const getHeight = (): number => {
         z-index: 1;
 
         &:hover {
-          height: 240px;
+          height: 200px;
           z-index: 5;
           background-color: #c4c4c4;
 
           box-shadow: var(--el-box-shadow-dark);
+
+          .img-shade {
+            opacity: 1 !important;
+          }
         }
         .item-img-box {
           width: 100%;
-          height: 160px;
+          height: 130px;
+          position: relative;
           margin: 0 auto;
 
           img {
@@ -267,15 +287,47 @@ const getHeight = (): number => {
             height: 100%;
             border-radius: 5px;
           }
+
+          .img-shade {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            background-color: #c4c4c480;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            user-select: none;
+
+            .img-shade-bottom {
+              width: calc(100% - 10px);
+              position: absolute;
+              bottom: 0;
+
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin: 0 5px;
+              .listennum {
+                color: white;
+                font-weight: 600;
+              }
+
+              .icon-play {
+                font-size: 30px;
+                color: var(--theme-color);
+              }
+            }
+          }
         }
 
         .item-details-label {
           margin-top: 20px;
 
+          display: -webkit-box;
           overflow: hidden;
           text-overflow: ellipsis;
-          display: -webkit-box;
           -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
         }
       }
     }
