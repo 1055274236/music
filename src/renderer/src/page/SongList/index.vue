@@ -3,7 +3,8 @@ import SongListApi from '@renderer/api/SongListApi'
 import {
   SongListCategoriesDataType,
   SongListCategoriesItem,
-  SongListList
+  SongListList,
+  Allsort
 } from '@renderer/api/type'
 import { reactive, onMounted, ref, onBeforeUnmount } from 'vue'
 import { useMouseInElement } from '@vueuse/core'
@@ -19,6 +20,8 @@ interface DataType {
   total: number
   songList: SongListList[]
   num: number
+  activeName: number
+  allsorts: Allsort[]
 }
 
 const data: DataType = reactive({
@@ -28,6 +31,8 @@ const data: DataType = reactive({
   typeShow: false,
   sortId: 1,
   songList: [],
+  allsorts: [],
+  activeName: 1,
 
   page: 1,
   total: 40,
@@ -48,6 +53,13 @@ onBeforeUnmount(() => {
 const getType = async (): Promise<void> => {
   const result = await SongListApi.getSongListCategories()
   data.songListType = result.data
+
+  data.categoryName = data.songListType.categories[0].categoryName || '全部'
+  data.categoryId = data.songListType.categories[0].categoryId || 10000000
+  data.allsorts = [{ sortId: 1, sortName: '默认' }]
+  const value = data.songListType.categories[0].items
+  if (value && value[0] && value[0].allsorts instanceof Array)
+    data.allsorts.push(...value[0].allsorts.filter((item) => item.sortId !== 1))
 }
 
 const getList = async (): Promise<void> => {
@@ -79,6 +91,10 @@ const typeClick = (item: SongListCategoriesItem): void => {
     data.typeShow = false
     data.categoryName = item.categoryName || '全部'
     data.categoryId = item.categoryId || 10000000
+    data.allsorts = [{ sortId: 1, sortName: '默认' }]
+    if (item.allsorts instanceof Array)
+      data.allsorts.push(...item.allsorts.filter((item) => item.sortId !== 1))
+    data.activeName = 1
     data.page = 1
     getList()
     setTimeout(() => {
@@ -112,10 +128,18 @@ const optimizeLikeNum = (likenum: number): string => {
       : `${Math.ceil(likenum / 10000)}万`
     : `${likenum}`
 }
+
+const tableChange = (activeName: string): void => {
+  data.sortId = parseInt(activeName)
+  data.page = 1
+  getList()
+}
 </script>
 
 <template>
   <div id="songlist">
+    <div class="songlist-label">歌单列表</div>
+
     <!-- 种类选择 -->
     <div class="songlist-type-box">
       <div class="type-box">
@@ -151,6 +175,15 @@ const optimizeLikeNum = (likenum: number): string => {
       </div>
     </div>
 
+    <el-tabs v-model="data.activeName" class="demo-tabs" @tab-change="tableChange">
+      <el-tab-pane
+        v-for="(item, index) in data.allsorts"
+        :key="index"
+        :label="item.sortName"
+        :name="item.sortId"
+      ></el-tab-pane>
+    </el-tabs>
+
     <!-- 歌单 -->
     <div class="songlist-details">
       <div v-for="item in data.songList" :key="item.dissid" class="songlist-item">
@@ -185,6 +218,10 @@ const optimizeLikeNum = (likenum: number): string => {
 
 <style lang="scss" scoped>
 #songlist {
+  .songlist-label {
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
   .type-box {
     user-select: none;
     position: relative;
@@ -251,7 +288,7 @@ const optimizeLikeNum = (likenum: number): string => {
       max-width: 140px;
       min-width: 120px;
       position: relative;
-      margin: 10px 10px;
+      margin: 0 10px 10px 0;
 
       .songlist-item-box {
         position: absolute;
