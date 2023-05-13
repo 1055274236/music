@@ -3,7 +3,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/songlist'
+    redirect: '/songlists'
   },
   {
     name: 'Home',
@@ -18,9 +18,15 @@ const routes: RouteRecordRaw[] = [
     meta: {}
   },
   {
-    name: 'SongList',
-    path: '/songlist',
-    component: () => import('@renderer/page/SongList/index.vue'),
+    name: 'SongLists',
+    path: '/songlists',
+    component: () => import('@renderer/page/SongLists/index.vue'),
+    meta: {}
+  },
+  {
+    name: 'SongListDetails',
+    path: '/songlistdetails/:disstid',
+    component: () => import('@renderer/page/SongListDetails/index.vue'),
     meta: {}
   }
 ]

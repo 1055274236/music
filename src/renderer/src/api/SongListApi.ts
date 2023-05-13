@@ -1,5 +1,5 @@
 import Abstract from './Abstract'
-import { SongListCategoriesType, SongListType } from './type'
+import { SongListCategoriesType, SongListType, SongListDetails } from './type'
 
 class SongListApi extends Abstract {
   constructor() {
@@ -34,7 +34,7 @@ class SongListApi extends Abstract {
 
   // 获取歌单详情
   // @params disstid 歌单id
-  getSongListDetail(disstid: string): Promise<unknown> {
+  getSongListDetail(disstid: string): Promise<SongListDetails> {
     return this.getReq('/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg?', {
       disstid,
       format: 'json',
@@ -44,7 +44,7 @@ class SongListApi extends Abstract {
       utf8: 1,
       onlysong: 0,
       new_format: 1
-    })
+    }) as Promise<SongListDetails>
   }
 }
 

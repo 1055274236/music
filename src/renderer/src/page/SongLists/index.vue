@@ -134,6 +134,10 @@ const tableChange = (activeName: string): void => {
   data.page = 1
   getList()
 }
+
+// const toSongList = (dissid: string): void => {
+//   router.push(`/songlist/${dissid}`)
+// }
 </script>
 
 <template>
@@ -186,7 +190,12 @@ const tableChange = (activeName: string): void => {
 
     <!-- 歌单 -->
     <div class="songlist-details">
-      <div v-for="item in data.songList" :key="item.dissid" class="songlist-item">
+      <RouterLink
+        v-for="item in data.songList"
+        :key="item.dissid"
+        class="songlist-item"
+        :to="`/songlistdetails/${item.dissid}`"
+      >
         <div class="songlist-item-box">
           <div class="item-img-box">
             <img :src="item.imgurl" :alt="item.dissname" />
@@ -200,7 +209,7 @@ const tableChange = (activeName: string): void => {
           <div class="item-details-box"></div>
           <div class="item-details-label">{{ item.dissname }}</div>
         </div>
-      </div>
+      </RouterLink>
     </div>
     <div class="pagination">
       <el-pagination
@@ -359,6 +368,7 @@ const tableChange = (activeName: string): void => {
 
         .item-details-label {
           margin-top: 20px;
+          color: black;
 
           display: -webkit-box;
           overflow: hidden;
