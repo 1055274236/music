@@ -13,9 +13,6 @@ const route = useRoute()
 interface DataType {
   list: SongListDetailsSonglist[]
   disstname: string
-  num: number
-  page: number
-  sum: number
   loading: boolean
   imgUrl: string
 }
@@ -23,17 +20,12 @@ interface DataType {
 const data: DataType = reactive({
   list: [],
   disstname: 'Un',
-  num: 20,
-  page: 1,
-  sum: 0,
   loading: false,
   imgUrl: ''
 })
 // const player = new Player()
 const playerStore = usePlayerStore()
 onBeforeMount(() => {
-  console.log('this is ming')
-
   getList()
 })
 
@@ -45,10 +37,11 @@ const getList = async (): Promise<void> => {
   })
   data.disstname = result.cdlist[0].dissname
 
-  data.sum === 0 && (data.sum = result.cdlist[0].total_song_num)
   const _result = result.cdlist[0].songlist
   data.imgUrl = result.cdlist[0].logo
   data.list = _result.filter((item) => item.pay.pay_play === 0)
+  // 接口只支持100位搜索，同时减少表格压力
+  data.list.splice(100)
 }
 
 const loadSong = async (songIndex = 0): Promise<void> => {
@@ -119,19 +112,6 @@ const rowDbClick = (row: SongListDetailsSonglist): void => {
         </template>
       </el-table-column>
     </el-table>
-    <div class="pagination">
-      <el-pagination
-        v-model:current-page="data.page"
-        :page-size="data.num"
-        small
-        background
-        layout="prev, pager, next"
-        :total="data.sum"
-        class="mt-4"
-        hide-on-single-page
-        @update:current-page="getList"
-      />
-    </div>
   </div>
 </template>
 

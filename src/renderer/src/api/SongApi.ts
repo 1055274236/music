@@ -1,5 +1,7 @@
 import Abstract from './Abstract'
 import { encrypt } from '@renderer/utils/encode/index'
+import { GetRecommend } from './type/getRecommend'
+import { GetTopLists } from './type/getTopLists'
 import moment from 'moment'
 
 import { MusicPlayerLink, SearchResult, SmartBox } from './type'
@@ -45,13 +47,13 @@ class SongApi extends Abstract {
   }
 
   // 获取排行榜单列表
-  getTopLists(): Promise<unknown> {
+  getTopLists(): Promise<GetTopLists> {
     return this.getReq('/v8/fcg-bin/fcg_myqq_toplist.fcg', {
       format: 'json',
       outCharset: 'utf-8',
       platform: 'h5',
       needNewCode: 1
-    })
+    }) as Promise<GetTopLists>
   }
 
   // 获取榜单详情
@@ -71,8 +73,11 @@ class SongApi extends Abstract {
   }
 
   // 获取首页推荐
-  getRecommend(): Promise<unknown> {
-    return this.getReq('', {})
+  getRecommend(): Promise<GetRecommend> {
+    return this.simpleGetReq('https://u.y.qq.com/cgi-bin/musicu.fcg', {
+      format: 'json',
+      data: '{"comm":{"ct":24},"category":{"method":"get_hot_category","param":{"qq":""},"module":"music.web_category_svr"},"recomPlaylist":{"method":"get_hot_recommend","param":{"async":1,"cmd":2},"module":"playlist.HotRecommendServer"},"playlist":{"method":"get_playlist_by_category","param":{"id":8,"curPage":1,"size":40,"order":5,"titleid":8},"module":"playlist.PlayListPlazaServer"},"new_song":{"module":"newsong.NewSongServer","method":"get_new_song_info","param":{"type":5}},"new_album":{"module":"newalbum.NewAlbumServer","method":"get_new_album_info","param":{"area":1,"sin":0,"num":10}},"new_album_tag":{"module":"newalbum.NewAlbumServer","method":"get_new_album_area","param":{}},"toplist":{"module":"musicToplist.ToplistInfoServer","method":"GetAll","param":{}},"focus":{"module":"QQMusic.MusichallServer","method":"GetFocus","param":{}}}'
+    }) as Promise<GetRecommend>
   }
 
   // 获取歌词

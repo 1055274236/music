@@ -142,8 +142,6 @@ const tableChange = (activeName: string): void => {
 
 <template>
   <div id="songlist">
-    <div class="songlist-label">歌单列表</div>
-
     <!-- 种类选择 -->
     <div class="songlist-type-box">
       <div class="type-box">
@@ -185,6 +183,7 @@ const tableChange = (activeName: string): void => {
         :key="index"
         :label="item.sortName"
         :name="item.sortId"
+        lazy
       ></el-tab-pane>
     </el-tabs>
 
@@ -227,10 +226,6 @@ const tableChange = (activeName: string): void => {
 
 <style lang="scss" scoped>
 #songlist {
-  .songlist-label {
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
   .type-box {
     user-select: none;
     position: relative;
