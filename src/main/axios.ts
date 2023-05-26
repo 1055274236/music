@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from 'axios'
 import { IpcMainInvokeEvent } from 'electron'
-import axios, { AxiosHeaders } from 'axios'
+import axios from 'axios'
 
 axios.defaults.timeout = 5000
 axios.defaults.baseURL = 'https://c.y.qq.com'
@@ -24,7 +24,7 @@ export default async function apiAxios(
     throw err
   })
 
-  if (process.env.NODE_ENV === 'development') console.log(new Date(), JSON.stringify(result.data))
+  // if (process.env.NODE_ENV === 'development') console.log(new Date(), JSON.stringify(result.data))
 
   return result.data
 }

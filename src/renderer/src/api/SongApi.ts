@@ -2,6 +2,8 @@ import Abstract from './Abstract'
 import { encrypt } from '@renderer/utils/encode/index'
 import { GetRecommend } from './type/getRecommend'
 import { GetTopLists } from './type/getTopLists'
+import { GetRanks } from './type/getRanks'
+import { GetSongInfo } from './type/getSongInfo'
 import moment from 'moment'
 
 import { MusicPlayerLink, SearchResult, SmartBox } from './type'
@@ -57,19 +59,17 @@ class SongApi extends Abstract {
   }
 
   // 获取榜单详情
-  getRanks(topId = '4', offset = 0, limit = 20): Promise<unknown> {
-    return this.getReq('https://u.y.qq.com/cgi-bin/musicu.fcg', {
-      req_1: {
-        module: 'musicToplist.ToplistInfoServer',
-        method: 'GetDetail',
-        param: {
-          topId,
-          offset,
-          num: limit,
-          period: `${moment().year()}_${moment().isoWeek()}`
+  getRanks(topId = 4, offset = 0, limit = 20): Promise<GetRanks> {
+    return this.simpleGetReq('https://u.y.qq.com/cgi-bin/musicu.fcg', {
+      format: 'json',
+      data: JSON.stringify({
+        req_1: {
+          module: 'musicToplist.ToplistInfoServer',
+          method: 'GetDetail',
+          param: { topId, offset, num: limit, period: `${moment().year()}_${moment().isoWeek()}` }
         }
-      }
-    })
+      })
+    }) as Promise<GetRanks>
   }
 
   // 获取首页推荐
@@ -93,15 +93,15 @@ class SongApi extends Abstract {
 
   // 获取歌曲详细信息
   // @params songid string 歌曲id
-  getSongInfo(songid: string): Promise<unknown> {
-    return this.getReq('https://u.y.qq.com/cgi-bin/musicu.fcg', {
+  getSongInfo(songid: string): Promise<GetSongInfo> {
+    return this.simpleGetReq('https://u.y.qq.com/cgi-bin/musicu.fcg', {
       format: 'json',
       inCharset: 'utf8',
       outCharset: 'utf-8',
       notice: 0,
       platform: 'yqq.json',
       needNewCode: 0,
-      data: {
+      data: JSON.stringify({
         comm: {
           ct: 24,
           cv: 0
@@ -115,8 +115,8 @@ class SongApi extends Abstract {
           },
           module: 'music.pf_song_detail_svr'
         }
-      }
-    })
+      })
+    }) as Promise<GetSongInfo>
   }
 
   // 获取播放链接

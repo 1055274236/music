@@ -1,16 +1,40 @@
 <script lang="ts" setup>
 import SongApi from '@renderer/api/SongApi'
 import { GetRecommend } from '@renderer/api/type/getRecommend'
-import { reactive, onMounted } from 'vue'
+import { reactive, onMounted, ref, onUnmounted } from 'vue'
 
 interface DataType {
   recommend?: GetRecommend
+  carouselMode: string
 }
 
-const data: DataType = reactive({})
+const data: DataType = reactive({
+  carouselMode: ''
+})
+const carousel = ref<HTMLDivElement>()
 onMounted(() => {
+  addListen()
   getMessage()
 })
+onUnmounted(() => {
+  removeListen()
+})
+
+const addListen = (): void => {
+  window.addEventListener('resize', changeCarouselMode)
+}
+
+const removeListen = (): void => {
+  window.removeEventListener('resize', changeCarouselMode)
+}
+
+const changeCarouselMode = (): void => {
+  if (carousel.value && carousel.value?.clientWidth > 800) {
+    data.carouselMode = 'card'
+  } else {
+    data.carouselMode = ''
+  }
+}
 
 const getMessage = (): void => {
   SongApi.getRecommend().then((result) => {
@@ -36,8 +60,8 @@ const optimizeLikeNum = (likenum: number): string => {
 <template>
   <div id="recommend">
     <!-- 10002跳转到专辑界面 -->
-    <div class="carousel">
-      <el-carousel trigger="click" indicator-position="outside">
+    <div ref="carousel" class="carousel">
+      <el-carousel trigger="click" indicator-position="outside" :type="data.carouselMode">
         <el-carousel-item v-for="item in data.recommend?.focus.data.content" :key="item.id">
           <img :src="item.pic_info.url" />
         </el-carousel-item>
@@ -264,11 +288,17 @@ const optimizeLikeNum = (likenum: number): string => {
 
           .ranking-item {
             width: calc(33% - 20px);
+            min-width: 200px;
             margin: 5px;
             padding: 5px;
             background-color: #fff;
             border-radius: 5px;
             box-shadow: var(--el-box-shadow-lighter);
+            transition: all 0.3s ease;
+
+            &:hover {
+              transform: scale(1.01);
+            }
 
             .ranking-item-content {
               .ranking-song {

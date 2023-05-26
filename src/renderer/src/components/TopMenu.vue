@@ -65,16 +65,20 @@ const searchClick = (): void => {
 
 const autocomplete_box = ref(null)
 const { isOutside } = useMouseInElement(autocomplete_box)
+
+const goHistory = (n: number): void => {
+  window.history.go(n)
+}
 </script>
 
 <template>
   <div id="main-top">
     <div class="box-left">
       <div class="route-option">
-        <el-icon>
+        <el-icon @click="goHistory(-1)">
           <ArrowLeftBold />
         </el-icon>
-        <el-icon>
+        <el-icon @click="goHistory(1)">
           <ArrowRightBold />
         </el-icon>
       </div>
@@ -85,6 +89,7 @@ const { isOutside } = useMouseInElement(autocomplete_box)
         @focus="() => (data.isFocus = true)"
         @blur="() => (data.isFocus = false)"
         @input="() => data.isFocus && data.keyword && getSmartbox()"
+        @keyup.enter="searchClick"
       >
         <template #prefix>
           <el-icon class="search-input-icon" @click="searchClick"><Search /></el-icon>
